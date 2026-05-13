@@ -1,264 +1,320 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
-import { loginUser } from '../../api/api'
-import { useAuth } from '../../context/AuthContext'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+import { useMutation } from "@tanstack/react-query";
+
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+
+import { loginUser } from "../../api/api";
+import { useAuth } from "../../context/AuthContext";
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap');
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: translateY(0); }
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
   }
-  .anim-1 { animation: fadeUp 0.6s 0.0s ease both; }
-  .anim-2 { animation: fadeUp 0.6s 0.1s ease both; }
-  .anim-3 { animation: fadeUp 0.6s 0.2s ease both; }
-  .anim-4 { animation: fadeUp 0.6s 0.3s ease both; }
-  .anim-5 { animation: fadeUp 0.6s 0.4s ease both; }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  input::placeholder { color: #c5b3ae; }
-  input:focus { outline: none; border-color: #9e7a74 !important; }
-  input { transition: border-color 0.2s ease; }
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.anim-1 { animation: fadeUp .7s .1s ease both; }
+.anim-2 { animation: fadeUp .7s .2s ease both; }
+.anim-3 { animation: fadeUp .7s .3s ease both; }
+.anim-4 { animation: fadeUp .7s .4s ease both; }
+
+.float {
+  animation: float 7s ease-in-out infinite;
+}
+
+input::placeholder {
+  color: #b8aea5;
+}
+
+input:focus {
+  outline: none;
+}
+
+.input-group {
+  transition: all .3s ease;
+}
+
+.input-group:focus-within {
+  transform: translateY(-2px);
+}
 `;
 
 export default function Login() {
   const [email, setEmail] = useState("");
+
   const [password, setPassword] = useState("");
+
   const [showPass, setShowPass] = useState(false);
+
   const navigate = useNavigate();
+
   const { login } = useAuth();
 
   const loginMutation = useMutation({
     mutationFn: loginUser,
+
     onSuccess: (data) => {
       login(data.user);
-      navigate('/');
+      navigate("/");
     },
   });
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    loginMutation.mutate({ email, password });
+
+    loginMutation.mutate({
+      email,
+      password,
+    });
   };
 
   return (
     <>
       <style>{styles}</style>
 
-      {/* Background */}
-      <div
-        className="fixed inset-0 -z-10"
-        style={{
-          background: "linear-gradient(135deg, #fdf0e8 0%, #f7e4d8 40%, #ede0d9 100%)",
-        }}
-      />
+      <div className="min-h-screen bg-[#f6f3ef] overflow-hidden relative flex flex-col">
+        {/* GLOW */}
+        <div className="absolute top-[-120px] left-[-120px] w-[320px] h-[320px] bg-[#d7c6b2]/20 blur-[100px] rounded-full" />
 
-      <div className="min-h-screen flex items-center justify-center px-4 py-12">
-        {/* Card */}
-        <div
-          className="w-full max-w-md rounded-3xl px-10 py-12"
-          style={{
-            background: "rgba(255,252,250,0.88)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,240,230,0.8)",
-            boxShadow:
-              "0 8px 40px rgba(100,70,60,0.08), 0 2px 8px rgba(100,70,60,0.04)",
-          }}
-        >
-          {/* Header */}
-          <div className="text-center mb-9 anim-1">
-            <p
-              className="text-[10px] tracking-[0.22em] uppercase mb-3"
-              style={{
-                fontFamily: "'Jost', sans-serif",
-                color: "#9e8a85",
-              }}
-            >
-              Welcome Back
-            </p>
-            <h1
-              className="text-[2.6rem] leading-tight font-light mb-2"
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                color: "#3d2f2c",
-              }}
-            >
-              Login to Glowify
-            </h1>
-            <p
-              className="text-sm font-light"
-              style={{
-                fontFamily: "'Jost', sans-serif",
-                color: "#b09a94",
-                letterSpacing: "0.01em",
-              }}
-            >
-              Enter your sanctuary of restorative care.
-            </p>
-          </div>
+        <div className="absolute bottom-[-100px] right-[-100px] w-[320px] h-[320px] bg-[#d7c6b2]/20 blur-[100px] rounded-full" />
 
-          {/* Fields */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5 mb-4 anim-2">
-            {/* Email */}
-            <div className="relative">
-              <span
-                className="absolute -top-2.25 left-3 px-1.5 text-[10px] tracking-[0.12em] uppercase"
-                style={{
-                  fontFamily: "'Jost', sans-serif",
-                  background: "white",
-                  color: "#9e8a85",
-                }}
-              >
-                Email Address
+        {/* FLOATING BOOKS */}
+        <div className="absolute left-[-70px] top-24 opacity-40 rotate-[-12deg] hidden lg:block float">
+          <img src="/images/book-stack-left.png" alt="" className="w-[260px]" />
+        </div>
+
+        <div className="absolute right-[-40px] bottom-16 opacity-40 rotate-[7deg] hidden lg:block float">
+          <img
+            src="/images/book-stack-right.png"
+            alt=""
+            className="w-[280px]"
+          />
+        </div>
+
+        {/* TOP NAV */}
+        <div className="relative z-20 w-full px-5 md:px-10 pt-8">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            {/* HOME BUTTON */}
+            <Link
+              to="/"
+              className="group inline-flex items-center gap-3 text-[#1d2430] hover:opacity-70 transition"
+            >
+              <div className="w-10 h-10 rounded-full border border-[#d9d0c7] flex items-center justify-center bg-white/70 backdrop-blur-sm group-hover:bg-[#1d2430] group-hover:text-white transition-all duration-300">
+                <ArrowLeft className="w-4 h-4" />
+              </div>
+
+              <span className="uppercase tracking-[0.2em] text-[11px]">
+                Back Home
               </span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@ritual.com"
-                className="w-full rounded-xl border px-4 py-3.5 text-sm"
-                style={{
-                  fontFamily: "'Jost', sans-serif",
-                  borderColor: "#e8d9d2",
-                  color: "#4a3530",
-                  background: "rgba(255,255,255,0.6)",
-                }}
-              />
-            </div>
+            </Link>
 
-            {/* Password */}
-            <div className="relative">
-              <span
-                className="absolute -top-2.25 left-3 px-1.5 text-[10px] tracking-[0.12em] uppercase"
+            {/* LOGO */}
+            <Link to="/" className="hidden md:block">
+              <h1
+                className="text-[#1d2430]"
                 style={{
-                  fontFamily: "'Jost', sans-serif",
-                  background: "white",
-                  color: "#9e8a85",
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontWeight: 600,
+                  fontSize: "2rem",
                 }}
               >
-                Password
-              </span>
-              <input
-                type={showPass ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full rounded-xl border px-4 py-3.5 pr-12 text-sm"
-                style={{
-                  fontFamily: "'Jost', sans-serif",
-                  borderColor: "#e8d9d2",
-                  color: "#4a3530",
-                  background: "rgba(255,255,255,0.6)",
-                }}
-              />
-              <button
-                onClick={() => setShowPass((s) => !s)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs cursor-pointer"
-                style={{
-                  fontFamily: "'Jost', sans-serif",
-                  color: "#b09a94",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                {showPass ? "hide" : "show"}
-              </button>
-            </div>
-
-            {/* Forgot Password */}
-            <div className="flex justify-end mb-7 anim-3">
-              <a
-                href="#"
-                className="text-xs"
-                style={{
-                  fontFamily: "'Jost', sans-serif",
-                  color: "#8a6e68",
-                  letterSpacing: "0.02em",
-                }}
-              >
-                Forgot Password?
-              </a>
-            </div>
-
-            {/* Sign In Button */}
-            <div className="anim-4">
-              <button
-                className="w-full rounded-full py-4 text-xs tracking-[0.18em] uppercase text-white cursor-pointer transition-all duration-250 hover:-translate-y-px active:translate-y-0"
-                style={{
-                  fontFamily: "'Jost', sans-serif",
-                  background: "linear-gradient(135deg, #7a5c56 0%, #5e4540 100%)",
-                  boxShadow: "0 4px 18px rgba(90,60,55,0.28)",
-                }}
-                type="submit"
-                disabled={loginMutation.isLoading}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.boxShadow =
-                    "0 6px 24px rgba(90,60,55,0.38)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.boxShadow =
-                    "0 4px 18px rgba(90,60,55,0.28)")
-                }
-              >
-                {loginMutation.isLoading ? 'Signing In...' : 'Sign In'}
-              </button>
-            </div>
-            {loginMutation.isError && (
-              <p
-                className="text-sm text-center mt-3"
-                style={{ color: '#b6403b', fontFamily: "'Jost', sans-serif" }}
-              >
-                {loginMutation.error?.response?.data?.message || loginMutation.error?.message}
-              </p>
-            )}
-          </form>
-
-          {/* Divider */}
-          <div className="my-7 flex items-center gap-4 anim-5">
-            <div
-              className="flex-1 h-px"
-              style={{
-                background: "linear-gradient(to right, transparent, #e5d5cf)",
-              }}
-            />
-            <span
-              className="text-[10px] tracking-widest uppercase"
-              style={{ fontFamily: "'Jost', sans-serif", color: "#c4ada7" }}
-            >
-              or
-            </span>
-            <div
-              className="flex-1 h-px"
-              style={{
-                background: "linear-gradient(to left, transparent, #e5d5cf)",
-              }}
-            />
-          </div>
-
-          {/* Create Account */}
-          <div className="text-center anim-5">
-            <p
-              className="text-xs mb-4"
-              style={{
-                fontFamily: "'Jost', sans-serif",
-                color: "#b09a94",
-                letterSpacing: "0.03em",
-              }}
-            >
-              New to our collective?
-            </p>
-            <Link to={"/auth/signup"}
-              className="w-full rounded-full px-10 py-3.5 border text-xs tracking-[0.18em] uppercase cursor-pointer transition-all duration-200 hover:bg-[rgba(120,85,80,0.06)]"
-              style={{
-                fontFamily: "'Jost', sans-serif",
-                borderColor: "#c4ada7",
-                color: "#7a5c56",
-              }}
-            >
-              Create Account
+                BookVerse
+              </h1>
             </Link>
           </div>
         </div>
+
+        {/* CENTER */}
+        <div className="flex-1 flex items-center justify-center px-5 py-8">
+          <div className="w-full max-w-md">
+            {/* CARD */}
+            <div
+              className="anim-2 relative backdrop-blur-xl px-8 md:px-12 py-6 overflow-hidden shadow hover:shadow-xl rounded-2xl"
+              style={{
+                boxShadow: "0 30px 80px rgba(30,30,30,0.08)",
+              }}
+            >
+              {/* CARD GLOW */}
+              <div className="absolute top-[-80px] right-[-80px] w-[180px] h-[180px] bg-[#e6d7c3]/30 blur-[80px] rounded-full" />
+
+              {/* HEADER */}
+              <div className="relative z-10 text-center mb-10 anim-1">
+                <p className="uppercase tracking-[0.28em] text-[10px] text-[#8d8178] mb-4">
+                  Curated for the Bibliophile
+                </p>
+
+                <h2
+                  className="text-[#1d1b19] mb-5"
+                  style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontWeight: 500,
+                    fontSize: "clamp(2.8rem,5vw,4rem)",
+                    letterSpacing: "-0.04em",
+                  }}
+                >
+                  Welcome Back
+                </h2>
+
+                <p className="text-[#7c746d] text-sm leading-relaxed max-w-xs mx-auto">
+                  Enter your details to continue your literary journey through
+                  BookVerse.
+                </p>
+              </div>
+
+              {/* FORM */}
+              <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
+                {/* EMAIL */}
+                <div className="input-group anim-3">
+                  <label className="block uppercase tracking-[0.2em] text-[10px] text-[#8d8178] mb-4">
+                    Email Address
+                  </label>
+
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="reader@bookverse.com"
+                    className="w-full bg-transparent border-b border-[#d7cdc3] h-12 text-[#1d1b19] text-sm p-2 rounded-xl"
+                  />
+                </div>
+
+                {/* PASSWORD */}
+                <div className="input-group anim-3">
+                  <div className="flex items-center justify-between mb-4 ">
+                    <label className="uppercase tracking-[0.2em] text-[10px] text-[#8d8178]">
+                      Password
+                    </label>
+
+                    <button
+                      type="button"
+                      className="text-[10px] uppercase tracking-[0.15em] text-[#9b6d63] hover:opacity-70 transition"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+
+                  <div className="relative flex items-center">
+                    <input
+                      type={showPass ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-transparent border-b border-[#d7cdc3] h-12 text-[#1d1b19] text-sm p-2 rounded-xl"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPass(!showPass)}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 text-[#8d8178] hover:text-[#1d2430] transition"
+                    >
+                      {showPass ? (
+                        <EyeOff className="w-4 h-4 mr-2" />
+                      ) : (
+                        <Eye className="w-4 h-4 mr-2" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* REMEMBER */}
+                <div className="anim-4 flex items-center gap-3">
+                  <input type="checkbox" className="w-4 h-4 accent-[#1d2430]" />
+
+                  <p className="text-sm text-[#7c746d]">
+                    Remember me for 30 days
+                  </p>
+                </div>
+
+                {/* BUTTON */}
+                <div className="anim-4 pt-2">
+                  <button
+                    type="submit"
+                    disabled={loginMutation.isPending}
+                    className="group relative overflow-hidden w-full h-14 bg-[#1d2430] text-white uppercase tracking-[0.24em] text-[10px] hover:bg-[#283347] transition-all duration-300 hover:-translate-y-0.5 rounded-xl"
+                  >
+                    <span className="relative z-10">
+                      {loginMutation.isPending ? "Signing In..." : "Sign In"}
+                    </span>
+
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-120%] group-hover:translate-x-[120%] transition-transform duration-1000" />
+                  </button>
+                </div>
+
+                {/* ERROR */}
+                {loginMutation.isError && (
+                  <p className="text-sm text-red-500 text-center">
+                    {loginMutation.error?.response?.data?.message ||
+                      loginMutation.error?.message}
+                  </p>
+                )}
+              </form>
+
+              {/* DIVIDER */}
+              <div className="relative z-10 my-10 border-t border-[#ebe2d8]" />
+
+              {/* REGISTER */}
+              <div className="relative z-10 text-center anim-4">
+                <p className="text-[#7c746d] text-sm">
+                  Don't have an account?{" "}
+                  <Link
+                    to="/auth/signup"
+                    className="text-[#1d2430] font-medium hover:underline"
+                  >
+                    Register
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FOOTER */}
+        <footer className="border-t border-[#e7dfd7] py-6 px-5">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5 text-[10px] uppercase tracking-[0.18em] text-[#8d8178]">
+            <p className="text-[#1d2430]">BookVerse</p>
+
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <a href="#">Terms of Service</a>
+
+              <span>/</span>
+
+              <a href="#">Privacy Policy</a>
+
+              <span>/</span>
+
+              <a href="#">Contact Us</a>
+
+              <span>/</span>
+
+              <a href="#">Instagram</a>
+            </div>
+
+            <p>&copy; 2026 BookVerse. Curated for the Bibliophile.</p>
+          </div>
+        </footer>
       </div>
     </>
   );

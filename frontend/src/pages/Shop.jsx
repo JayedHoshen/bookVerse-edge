@@ -1,74 +1,116 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { fetchProducts } from '../api/api';
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProducts } from "../api/api";
+import { FaGreaterThan, FaLessThan } from "react-icons/fa6";
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap');
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
   }
-  .anim-1 { animation: fadeUp 0.5s 0.0s ease both; }
-  .anim-2 { animation: fadeUp 0.5s 0.05s ease both; }
-  .anim-3 { animation: fadeUp 0.5s 0.1s ease both; }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anim-1 { animation: fadeUp .6s .1s ease both; }
+.anim-2 { animation: fadeUp .6s .2s ease both; }
+.anim-3 { animation: fadeUp .6s .3s ease both; }
+
+.product-card img {
+  transition: transform .8s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.04);
+}
+
+.product-card {
+  transition: transform .4s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+}
 `;
 
-const CATEGORIES = ["CLEANSER", "SERUM", "MOISTURIZER", "TONER", "RITUAL"];
-const SORT_OPTIONS = ["Newest Arrivals", "Price: Low to High", "Price: High to Low"];
+const CATEGORIES = ["FICTION", "CLASSIC", "PHILOSOPHY", "POETRY", "ART"];
+
+const AUTHORS = ["Joan Didion", "Albert Camus", "Virginia Woolf"];
+
+const SORT_OPTIONS = [
+  "Newest First",
+  "Price: Low to High",
+  "Price: High to Low",
+];
 
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const [checkedCats, setCheckedCats] = useState([]);
-  const [priceMax, setPriceMax] = useState(200);
-  const [sort, setSort] = useState("Newest Arrivals");
+  const [priceMax, setPriceMax] = useState(150);
+  const [sort, setSort] = useState("Newest First");
   const [sortOpen, setSortOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 9;
 
-  const urlCategory = searchParams.get('category');
+  const limit = 6;
 
-  // Sync with URL and clear filters when "Shop All" is clicked
+  const urlCategory = searchParams.get("category");
+
   useEffect(() => {
     if (urlCategory) {
       setCheckedCats([urlCategory]);
     } else {
-      setCheckedCats([]);        // Important: Clear when no category in URL
+      setCheckedCats([]);
     }
   }, [urlCategory]);
 
-  const categoryParam = checkedCats.length ? checkedCats.join('|') : undefined;
-  
-  const sortParam = sort === 'Price: Low to High' ? 'priceAsc' 
-                 : sort === 'Price: High to Low' ? 'priceDesc' 
-                 : 'newest';
+  const categoryParam = checkedCats.length ? checkedCats.join("|") : undefined;
+
+  const sortParam =
+    sort === "Price: Low to High"
+      ? "priceAsc"
+      : sort === "Price: High to Low"
+        ? "priceDesc"
+        : "newest";
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['products', categoryParam, priceMax, sortParam, currentPage],
-    queryFn: () => fetchProducts({ 
-      category: categoryParam, 
-      maxPrice: priceMax, 
-      sort: sortParam,
-      page: currentPage,
-      limit 
-    }),
+    queryKey: ["products", categoryParam, priceMax, sortParam, currentPage],
+
+    queryFn: () =>
+      fetchProducts({
+        category: categoryParam,
+        maxPrice: priceMax,
+        sort: sortParam,
+        page: currentPage,
+        limit,
+      }),
+
     keepPreviousData: true,
   });
 
   const products = data?.products || data || [];
-  const totalPages = data?.totalPages || Math.ceil((data?.total || 0) / limit) || 1;
+
+  const totalPages =
+    data?.totalPages || Math.ceil((data?.total || 0) / limit) || 1;
 
   const toggleCat = (cat) => {
     const newCats = checkedCats.includes(cat) ? [] : [cat];
+
     setCheckedCats(newCats);
     setCurrentPage(1);
 
     if (newCats.length > 0) {
-      setSearchParams({ category: newCats[0] });
+      setSearchParams({
+        category: newCats[0],
+      });
     } else {
       setSearchParams({});
     }
@@ -76,10 +118,10 @@ export default function Shop() {
 
   const clearFilters = () => {
     setCheckedCats([]);
-    setPriceMax(200);
-    setSort("Newest Arrivals");
+    setPriceMax(150);
+    setSort("Newest First");
     setCurrentPage(1);
-    setSearchParams({});           // Clear URL
+    setSearchParams({});
   };
 
   const handleSortChange = (newSort) => {
@@ -88,41 +130,71 @@ export default function Shop() {
     setCurrentPage(1);
   };
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-[#fdf6f2]">Loading products...</div>;
-  if (isError) return <div className="min-h-screen flex items-center justify-center bg-[#fdf6f2]">Failed to load products.</div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#f6f3ef] flex items-center justify-center">
+        <p className="text-[#7c746d] text-lg">Loading catalog...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-[#f6f3ef] flex items-center justify-center">
+        <p className="text-[#7c746d] text-lg">Failed to load catalog.</p>
+      </div>
+    );
+  }
 
   return (
     <>
       <style>{styles}</style>
-      <div className="min-h-screen w-full" style={{ background: "#fdf6f2", fontFamily: "'Jost', sans-serif" }}>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-12">
 
-          <p className="anim-1 text-xs tracking-widest uppercase mb-6 text-[#9e8a85]">
-            Home › Shop All
-          </p>
+      <div className="min-h-screen bg-[#f6f3ef] overflow-hidden">
+        <div className="container mx-auto px-4 md:px-6 lg:px-8 py-10 md:py-14">
+          {/* TOP */}
+          <div className="anim-1 flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
+            {/* LEFT */}
+            <div className="mx-auto">
+              <h1
+                className="text-[#1d1b19] leading-none mb-3"
+                style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontWeight: 500,
+                  fontSize: "clamp(2.6rem,5vw,4.5rem)",
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                Curated Catalog
+              </h1>
 
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-serif text-[#2e2420]">Curated Essentials</h1>
-              <p className="text-[#9e8a85] mt-2">Nature meets science in intentional rituals.</p>
+              <p className="text-[#7c746d] text-base">
+                Showing {products.length} titles from independent presses
+              </p>
             </div>
 
+            {/* SORT */}
             <div className="relative">
               <button
                 onClick={() => setSortOpen(!sortOpen)}
-                className="flex items-center gap-2 px-5 py-3 border rounded-full text-sm bg-white"
-                style={{ borderColor: "#d4c4be" }}
+                className="flex items-center gap-3 border-b border-[#c9beb3] pb-2 text-sm text-[#5e554d]"
               >
-                {sort} ↓
+                <span className="uppercase tracking-[0.2em] text-[10px]">
+                  Sort By
+                </span>
+
+                <span className="btn">{sort}</span>
               </button>
 
               {sortOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border z-50 overflow-hidden">
-                  {SORT_OPTIONS.map(opt => (
+                <div className="absolute right-0 top-10 w-64 bg-white border border-[#e4dbd2] shadow-xl z-50">
+                  {SORT_OPTIONS.map((opt) => (
                     <button
                       key={opt}
                       onClick={() => handleSortChange(opt)}
-                      className={`w-full text-left px-6 py-3.5 hover:bg-[#fdf0ee] ${sort === opt ? 'font-medium bg-[#f9ece6]' : ''}`}
+                      className={`w-full text-left px-5 py-4 text-sm hover:bg-[#f3ede7] transition ${
+                        sort === opt ? "bg-[#f3ede7]" : ""
+                      }`}
                     >
                       {opt}
                     </button>
@@ -132,81 +204,250 @@ export default function Shop() {
             </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-            {/* Filters */}
-            <aside className="lg:w-64 shrink-0">
-              <div className="mb-8">
-                <p className="uppercase text-xs tracking-widest mb-4 font-medium">Category</p>
-                {CATEGORIES.map(cat => (
-                  <label key={cat} className="flex items-center gap-3 mb-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={checkedCats.includes(cat)}
-                      onChange={() => toggleCat(cat)}
-                      className="w-4 h-4 accent-[#7a5c56]"
-                    />
-                    <span className="text-sm">{cat}</span>
-                  </label>
-                ))}
+          {/* CONTENT */}
+          <div className="flex flex-col lg:flex-row gap-12">
+            {/* SIDEBAR */}
+            <aside className="lg:w-62 shrink-0 anim-2">
+              {/* GENRE */}
+              <div className="mb-12">
+                <h3 className="uppercase tracking-[0.25em] text-[10px] text-[#8d8178] mb-5">
+                  Genre
+                </h3>
+
+                <div className="space-y-4">
+                  {CATEGORIES.map((cat) => (
+                    <label
+                      key={cat}
+                      className="flex items-center gap-3 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checkedCats.includes(cat)}
+                        onChange={() => toggleCat(cat)}
+                        className="w-4 h-4 accent-[#1d1b19]"
+                      />
+
+                      <span className="text-sm text-[#3d3834]">
+                        {cat === "FICTION"
+                          ? "Contemporary Fiction"
+                          : cat === "CLASSIC"
+                            ? "Classic Literature"
+                            : cat === "PHILOSOPHY"
+                              ? "Philosophy & Essays"
+                              : cat === "POETRY"
+                                ? "Poetry"
+                                : "Art & Design"}
+                      </span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
-              <div className="mb-8">
-                <p className="uppercase text-xs tracking-widest mb-4 font-medium">Price</p>
+              {/* AUTHORS */}
+              <div className="mb-12">
+                <h3 className="uppercase tracking-[0.25em] text-[10px] text-[#8d8178] mb-5">
+                  Authors
+                </h3>
+
+                <div className="space-y-4">
+                  {AUTHORS.map((author) => (
+                    <button
+                      key={author}
+                      className="block text-sm text-[#3d3834] hover:text-black hover:bg-gray-100 transition"
+                    >
+                      {author}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* PRICE */}
+              <div className="mb-12">
+                <h3 className="uppercase tracking-[0.25em] text-[10px] text-[#8d8178] mb-5">
+                  Price Range
+                </h3>
+
                 <input
                   type="range"
-                  min={0}
-                  max={200}
+                  min={10}
+                  max={150}
                   value={priceMax}
-                  onChange={(e) => { setPriceMax(Number(e.target.value)); setCurrentPage(1); }}
-                  className="w-full accent-[#7a5c56]"
+                  onChange={(e) => {
+                    setPriceMax(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="w-full accent-[#1d1b19]"
                 />
-                <div className="flex justify-between text-xs mt-2 text-[#9e8a85]">
-                  <span>$0</span>
+
+                <div className="flex justify-between mt-3 text-xs text-[#8d8178]">
+                  <span>$10</span>
                   <span>${priceMax}</span>
                 </div>
               </div>
 
-              <button 
+              {/* CLEAR */}
+              <button
                 onClick={clearFilters}
-                className="w-full py-3 bg-[#5e4540] text-white rounded-xl text-sm tracking-widest hover:bg-[#4a3632]"
+                className="btn uppercase tracking-[0.25em] text-[10px] border-b border-[#b8aca0] text-[#5f554d] hover:text-black transition"
               >
-                CLEAR ALL FILTERS
+                Clear All Filters
               </button>
             </aside>
 
-            {/* Products Grid */}
+            {/* PRODUCT GRID */}
             <div className="flex-1">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-6">
-                {products.map((product, i) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product, index) => (
                   <Link
                     key={product._id}
                     to={`/shop/${product._id}`}
-                    className="product-card rounded-2xl overflow-hidden bg-white border border-[#f0e4df] group"
+                    className={`product-card anim-3 shadow hover:shadow-xl p-4 rounded-2xl `}
                   >
-                    <div className="aspect-square overflow-hidden">
-                      <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    {/* IMAGE */}
+                    <div
+                      className="overflow-hidden bg-[#ebe5df] mb-5 rounded-t-xl"
+                      style={{
+                        aspectRatio: "3/4",
+                      }}
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover rounded-t-xl"
+                      />
                     </div>
-                    <div className="p-4">
-                      <p className="text-xs uppercase tracking-widest text-[#9e8a85]">{product.category}</p>
-                      <h3 className="font-serif text-base md:text-lg mt-1 mb-1 leading-tight">{product.name}</h3>
-                      <p className="font-medium">${product.price}</p>
+
+                    {/* TITLE */}
+                    <h3
+                      className="text-[#1d1b19] leading-snug mb-1"
+                      style={{
+                        fontFamily: "'Cormorant Garamond', serif",
+                        fontWeight: 500,
+                        fontSize: "clamp(1.1rem,2vw,1.6rem)",
+                      }}
+                    >
+                      {product.name}
+                    </h3>
+
+                    {/* AUTHOR */}
+                    <p className="text-[#7c746d] text-sm mb-3">
+                      {product.brand || "Hafez Jayed"}
+                    </p>
+
+                    {/* PRICE + CATEGORY */}
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-[#1d1b19] text-sm font-medium">
+                        ${product.price}
+                      </p>
+
+                      <span className="bg-[#ebe5df] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-[#6f655d]">
+                        {product.category || "Fiction"}
+                      </span>
                     </div>
                   </Link>
                 ))}
               </div>
 
+              {/* EMPTY */}
               {products.length === 0 && (
-                <p className="text-center py-20 text-gray-500">No products found.</p>
+                <div className="flex items-center justify-center px-6 bg-white rounded-2xl p-4 shadow">
+                  <div className="relative text-center max-w-xl">
+                    {/* SOFT GLOW */}
+                    <div className="absolute inset-0 flex justify-center ">
+                      <div className="w-72 h-72 bg-[#20242b] blur-[100px] rounded-full animate-ping" />
+                    </div>
+
+                    {/* CONTENT */}
+                    <div className="relative z-10">
+                      {/* ICON */}
+                      <div className="mb-8 flex justify-center">
+                        <div className="w-24 h-24 rounded-full border border-[#d8cdc3] bg-[#f1ebe4] flex items-center justify-center shadow-sm">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-10 h-10 text-[#d18851]"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="1.2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 6v6l4 2"
+                            />
+                            <circle cx="12" cy="12" r="9" />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* TITLE */}
+                      <h2
+                        className="text-[#1d1b19] mb-4 leading-none"
+                        style={{
+                          fontFamily: "'Cormorant Garamond', serif",
+                          fontWeight: 500,
+                          fontSize: "clamp(2.5rem,5vw,4rem)",
+                          letterSpacing: "-0.03em",
+                        }}
+                      >
+                        No Books Found
+                      </h2>
+
+                      {/* DESCRIPTION */}
+                      <p className="text-[#7c746d] leading-relaxed max-w-md mx-auto text-sm md:text-base mb-8">
+                        We couldn't find any titles matching your current
+                        filters. Try adjusting your categories or explore the
+                        complete literary collection.
+                      </p>
+
+                      {/* BUTTON */}
+                      <button
+                        onClick={clearFilters}
+                        className="h-12 px-8 bg-[#1d2430] text-white uppercase tracking-[0.22em] text-[10px] hover:bg-[#2b3547] transition-all duration-300 hover:-translate-y-0.5"
+                      >
+                        Explore All Books
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
 
-              {/* Pagination */}
+              {/* PAGINATION */}
               {totalPages > 1 && (
-                <div className="flex justify-center gap-3 mt-16">
-                  <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="px-5 py-2 border rounded-xl disabled:opacity-50">Previous</button>
-                  {Array.from({ length: totalPages }, (_, i) => i+1).map(page => (
-                    <button key={page} onClick={() => setCurrentPage(page)} className={`w-10 h-10 rounded-xl ${currentPage === page ? 'bg-[#7a5c56] text-white' : 'border hover:bg-gray-100'}`}>{page}</button>
-                  ))}
-                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-5 py-2 border rounded-xl disabled:opacity-50">Next</button>
+                <div className="flex justify-center items-center gap-4 mt-20">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="text-[#7c746d] hover:text-black transition disabled:opacity-30"
+                  >
+                    <FaLessThan />
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-9 h-9 text-sm transition ${
+                          currentPage === page
+                            ? "bg-[#1d2430] text-white"
+                            : "text-[#5e554d] hover:bg-[#e7dfd7]"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ),
+                  )}
+
+                  <button
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="text-[#7c746d] hover:text-black transition disabled:opacity-30"
+                  >
+                    <FaGreaterThan />
+                  </button>
                 </div>
               )}
             </div>
