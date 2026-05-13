@@ -1,241 +1,284 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useQuery } from '@tanstack/react-query';
-import { getCart } from '../api/api';
-import { useAuth } from '../context/AuthContext';
-
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500&display=swap');
-
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .mobile-menu-open {
-    animation: slideDown 0.25s ease both;
-  }
-
-  .nav-link-active::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: #2e2420;
-  }
-
-  .hamburger-line {
-    display: block;
-    width: 22px;
-    height: 1.5px;
-    background: #2e2420;
-    border-radius: 2px;
-    transition: all 0.3s ease;
-    transform-origin: center;
-  }
-
-  .ham-open .hamburger-line:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
-  .ham-open .hamburger-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
-  .ham-open .hamburger-line:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
-`;
+import { useQuery } from "@tanstack/react-query";
+import { getCart } from "../api/api";
+import { useAuth } from "../context/AuthContext";
 
 const NAV_LINKS = [
-  { label: "Shop All", category: null },
-  { label: "Cleansers", category: "CLEANSER" },
-  { label: "Serums", category: "SERUM" },
-  { label: "Moisturizers", category: "MOISTURIZER" },
-  { label: "Rituals", category: "RITUAL" }
+  { label: "Catalog", category: null },
+  { label: "Fiction", category: "FICTION" },
+  { label: "Philosophy", category: "PHILOSOPHY" },
+  { label: "Poetry", category: "POETRY" },
+  { label: "History", category: "HISTORY" },
 ];
 
 export default function Navbar() {
-  const [active, setActive] = useState("Shop All");
+  const [active, setActive] = useState("Catalog");
   const [menuOpen, setMenuOpen] = useState(false);
+
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const { data: cartData } = useQuery({
-    queryKey: ['cart'],
+    queryKey: ["cart"],
     queryFn: getCart,
     enabled: !!user,
     staleTime: 1000 * 60 * 5,
   });
 
   const isAuthenticated = Boolean(user);
-  const cartCount = cartData?.data?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+
+  const cartCount =
+    cartData?.data?.items?.reduce((total, item) => total + item.quantity, 0) ||
+    0;
 
   const handleCategoryClick = (label, category) => {
     setActive(label);
     setMenuOpen(false);
 
     if (category) {
-      // Go to shop with category filter
-      const dashboardPath = user?.role === 'admin' ? '/admin/dashboard' : `/shop?category=${category}`;
+      const dashboardPath =
+        user?.role === "admin"
+          ? "/admin/dashboard"
+          : `/shop?category=${category}`;
+
       navigate(dashboardPath, { replace: true });
     } else {
-      // "Shop All" - clear all filters
-      navigate('/shop', { replace: true });
+      navigate("/shop", { replace: true });
     }
   };
 
   const handleCartClick = () => {
     if (isAuthenticated) {
-      if (user?.role === 'admin') {
-        navigate('/admin/dashboard');
+      if (user?.role === "admin") {
+        navigate("/admin/dashboard");
       } else {
-        navigate('/user/cart');
+        navigate("/user/cart");
       }
     } else {
-      navigate('/auth/login');
+      navigate("/auth/login");
     }
   };
 
   const handleAccountClick = () => {
     if (isAuthenticated) {
-      const dashboardPath = user?.role === 'admin' ? '/admin/dashboard' : '/user/dashboard';
+      const dashboardPath =
+        user?.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+
       navigate(dashboardPath);
     } else {
-      navigate('/auth/login');
+      navigate("/auth/login");
     }
   };
 
   return (
     <>
-      <style>{styles}</style>
-
-      <nav className="sticky top-0 z-50 w-full border-b" style={{ background: "#f9ece6", borderColor: "#edddd7" }}>
-        <div className="mx-auto max-w-7xl px-5 md:px-10 h-16 flex items-center justify-between">
-
-          {/* Logo */}
-          <Link to="/" className="text-base tracking-[0.22em] uppercase font-medium" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#2e2420" }}>
-            Glowify
+      {/* NAVBAR */}
+      <nav className="sticky top-0 z-50 border-b border-neutral-800 bg-[#0F0F0F]/90 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto h-20 px-6 lg:px-10 flex items-center justify-between">
+          {/* LOGO */}
+          <Link
+            to="/"
+            className="text-3xl md:text-4xl tracking-wide text-[#E7D7B7]"
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+            }}
+          >
+            BookVerse
           </Link>
 
-          {/* Desktop Navigation */}
-          <ul className="hidden md:flex items-center gap-1">
+          {/* DESKTOP NAV */}
+          <ul className="hidden lg:flex items-center gap-10">
             {NAV_LINKS.map(({ label, category }) => (
               <li key={label}>
                 <button
                   onClick={() => handleCategoryClick(label, category)}
-                  className={`relative px-4 py-2 text-[13.5px] tracking-wide transition-colors ${active === label ? "nav-link-active" : ""}`}
-                  style={{
-                    fontFamily: "'Jost', sans-serif",
-                    fontWeight: active === label ? "400" : "300",
-                    color: active === label ? "#2e2420" : "#9e8a85",
-                  }}
+                  className={`relative text-sm uppercase tracking-[0.25em] transition-all duration-300 ${
+                    active === label
+                      ? "text-[#E7D7B7]"
+                      : "text-neutral-500 hover:text-neutral-200"
+                  }`}
                 >
                   {label}
+
+                  {active === label && (
+                    <span className="absolute left-0 -bottom-3 w-full h-[1px] bg-[#E7D7B7]" />
+                  )}
                 </button>
               </li>
             ))}
           </ul>
 
-          {/* Right Side */}
-          <div className="flex items-center gap-1">
-            {/* Search */}
-            <button className="w-9 h-9 flex items-center justify-center hover:bg-black/5 rounded-full" style={{ color: "#2e2420" }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          {/* RIGHT SIDE */}
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* SEARCH */}
+            <button className="btn btn-circle btn-ghost border border-neutral-800 hover:border-[#E7D7B7] hover:bg-[#171717]">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4 text-[#E7D7B7]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
             </button>
 
-            {/* Cart */}
-            <button onClick={handleCartClick} className="relative w-9 h-9 flex items-center justify-center hover:bg-black/5 rounded-full" style={{ color: "#2e2420" }}>
+            {/* CART */}
+            <button
+              onClick={handleCartClick}
+              className="relative btn btn-circle btn-ghost border border-neutral-800 hover:border-[#E7D7B7] hover:bg-[#171717]"
+            >
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#a89088] text-white text-xs rounded-full flex items-center justify-center font-medium">
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#E7D7B7] text-black text-xs flex items-center justify-center font-medium">
                   {cartCount}
                 </span>
               )}
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4 text-[#E7D7B7]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
                 <line x1="3" y1="6" x2="21" y2="6" />
               </svg>
             </button>
 
-            {/* Account */}
-            <button onClick={handleAccountClick} className="w-9 h-9 flex items-center justify-center hover:bg-black/5 rounded-full" style={{ color: "#2e2420" }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            {/* ACCOUNT */}
+            <button
+              onClick={handleAccountClick}
+              className="btn btn-circle btn-ghost border border-neutral-800 hover:border-[#E7D7B7] hover:bg-[#171717]"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4 text-[#E7D7B7]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
             </button>
 
-            {/* Hamburger */}
+            {/* MOBILE MENU BUTTON */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`md:hidden w-9 h-9 flex flex-col items-center justify-center gap-1.5 ${menuOpen ? "ham-open" : ""}`}
+              className="lg:hidden btn btn-circle btn-ghost border border-neutral-800"
             >
-              <span className="hamburger-line" />
-              <span className="hamburger-line" />
-              <span className="hamburger-line" />
+              {menuOpen ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5 text-[#E7D7B7]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5 text-[#E7D7B7]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 7h16M4 12h16M4 17h16"
+                  />
+                </svg>
+              )}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* MOBILE MENU */}
         {menuOpen && (
-          <div className="md:hidden mobile-menu-open border-t px-5 py-4" style={{ background: "#fdf0ee" }}>
-            {NAV_LINKS.map(({ label, category }) => (
-              <button
-                key={label}
-                onClick={() => handleCategoryClick(label, category)}
-                className="w-full text-left py-3 px-4 rounded-xl text-sm"
-                style={{
-                  fontWeight: active === label ? "500" : "400",
-                  color: active === label ? "#2e2420" : "#9e8a85",
-                }}
-              >
-                {label}
-              </button>
-            ))}
+          <div className="lg:hidden border-t border-neutral-800 bg-[#111111]">
+            <div className="px-6 py-6 flex flex-col gap-4">
+              {NAV_LINKS.map(({ label, category }) => (
+                <button
+                  key={label}
+                  onClick={() => handleCategoryClick(label, category)}
+                  className={`text-left text-sm uppercase tracking-[0.2em] transition ${
+                    active === label ? "text-[#E7D7B7]" : "text-neutral-500"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
 
-            {/* Mobile Auth Links */}
-            <div className="border-t mt-4 pt-4 space-y-2">
-              {!isAuthenticated ? (
-                <>
-                  <button
-                    onClick={() => { navigate('/auth/login'); setMenuOpen(false); }}
-                    className="w-full text-left py-3 px-4 rounded-xl text-sm font-medium"
-                    style={{ color: "#2e2420" }}
-                  >
-                    Login
-                  </button>
-                  <button
-                    onClick={() => { navigate('/auth/signup'); setMenuOpen(false); }}
-                    className="w-full text-left py-3 px-4 rounded-xl text-sm font-medium"
-                    style={{ color: "#2e2420" }}
-                  >
-                    Sign Up
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => { handleCartClick(); setMenuOpen(false); }}
-                    className="w-full text-left py-3 px-4 rounded-xl text-sm font-medium flex items-center justify-between"
-                    style={{ color: "#2e2420" }}
-                  >
-                    Cart {cartCount > 0 && <span className="bg-[#a89088] text-white px-2 py-1 rounded-full text-xs">{cartCount}</span>}
-                  </button>
-                  <button
-                    onClick={() => { handleAccountClick(); setMenuOpen(false); }}
-                    className="w-full text-left py-3 px-4 rounded-xl text-sm font-medium"
-                    style={{ color: "#2e2420" }}
-                  >
-                    {user?.role === 'admin' ? 'Admin Dashboard' : 'My Account'}
-                  </button>
-                </>
-              )}
+              <div className="border-t border-neutral-800 pt-5 flex flex-col gap-4">
+                {!isAuthenticated ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        navigate("/auth/login");
+                        setMenuOpen(false);
+                      }}
+                      className="btn rounded-full bg-[#E7D7B7] text-black border-none hover:bg-[#d9c49f]"
+                    >
+                      Sign In
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        navigate("/auth/signup");
+                        setMenuOpen(false);
+                      }}
+                      className="btn btn-outline rounded-full border-neutral-700 text-[#E7D7B7]"
+                    >
+                      Create Account
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        handleCartClick();
+                        setMenuOpen(false);
+                      }}
+                      className="btn rounded-full bg-[#E7D7B7] text-black border-none"
+                    >
+                      Cart ({cartCount})
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        handleAccountClick();
+                        setMenuOpen(false);
+                      }}
+                      className="btn btn-outline rounded-full border-neutral-700 text-[#E7D7B7]"
+                    >
+                      {user?.role === "admin"
+                        ? "Admin Dashboard"
+                        : "My Account"}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}
       </nav>
-
-      {menuOpen && <div className="fixed inset-0 bg-black/20 z-40 md:hidden" onClick={() => setMenuOpen(false)} />}
     </>
   );
 }

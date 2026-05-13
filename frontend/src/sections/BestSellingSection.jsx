@@ -5,109 +5,110 @@ import { fetchBestSellers, addToCart } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap');
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
   }
-  .anim-1 { animation: fadeUp 0.6s 0.0s ease both; }
-  .anim-2 { animation: fadeUp 0.6s 0.1s ease both; }
-  .anim-3 { animation: fadeUp 0.6s 0.2s ease both; }
-  .anim-4 { animation: fadeUp 0.6s 0.3s ease both; }
-  .anim-5 { animation: fadeUp 0.6s 0.4s ease both; }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  @keyframes shimmer {
-    0% { background-position: -400px 0; }
-    100% { background-position: 400px 0; }
-  }
+.anim-1 { animation: fadeUp .7s .1s ease both; }
+.anim-2 { animation: fadeUp .7s .2s ease both; }
+.anim-3 { animation: fadeUp .7s .3s ease both; }
+.anim-4 { animation: fadeUp .7s .4s ease both; }
+.anim-5 { animation: fadeUp .7s .5s ease both; }
 
-  .skeleton {
-    background: linear-gradient(90deg, #f0e4df 25%, #f7ede9 50%, #f0e4df 75%);
-    background-size: 800px 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
-    border-radius: 8px;
-  }
+.book-card img {
+  transition: transform .7s ease;
+}
 
-  .product-card {
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-  }
-  .product-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(100,60,50,0.1) !important;
-  }
-  .product-card img {
-    transition: transform 0.5s ease;
-  }
-  .product-card:hover img {
-    transform: scale(1.03);
-  }
+.book-card:hover img {
+  transform: scale(1.04);
+}
 
-  .add-to-cart-btn {
-    transition: all 0.2s ease;
-  }
-  .add-to-cart-btn:hover {
-    background: #2e2420 !important;
-    color: white !important;
-    border-color: #2e2420 !important;
-  }
+.book-card {
+  transition: transform .4s ease;
+}
+
+.book-card:hover {
+  transform: translateY(-4px);
+}
 `;
 
 const ANIM_CLASSES = ["anim-2", "anim-3", "anim-4", "anim-5"];
 
 function SkeletonCard({ index }) {
   return (
-    <div
-      className={`flex flex-col rounded-2xl overflow-hidden ${ANIM_CLASSES[index] || "anim-2"}`}
-      style={{
-        background: "#fff",
-        border: "1px solid #f0e4df",
-        boxShadow: "0 4px 20px rgba(100,60,50,0.05)",
-      }}
-    >
-      <div className="w-full skeleton" style={{ aspectRatio: "1/1" }} />
-      <div className="flex flex-col p-5 gap-3">
-        <div className="skeleton" style={{ width: "60%", height: "12px" }} />
-        <div className="skeleton" style={{ width: "80%", height: "18px" }} />
-        <div className="skeleton" style={{ width: "40%", height: "12px" }} />
-        <div className="skeleton" style={{ width: "50%", height: "16px" }} />
-        <div className="skeleton" style={{ width: "100%", height: "44px", borderRadius: "999px", marginTop: "8px" }} />
+    <div className={`${ANIM_CLASSES[index]} animate-pulse`}>
+      <div className="aspect-[3/4] bg-neutral-200 mb-5" />
+
+      <div className="space-y-3">
+        <div className="h-2 bg-neutral-200 w-16" />
+        <div className="h-5 bg-neutral-200 w-40" />
+        <div className="h-3 bg-neutral-200 w-24" />
+        <div className="h-4 bg-neutral-200 w-14" />
       </div>
     </div>
   );
 }
 
-export default function BestSellers() {
+export default function TrendingBooks() {
   const [added, setAdded] = useState({});
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: products = [], isLoading, isError } = useQuery({
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["bestSellers"],
     queryFn: () => fetchBestSellers(4),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   const addToCartMutation = useMutation({
     mutationFn: (productId) => addToCart(productId, 1),
+
     onSuccess: (_, productId) => {
-      setAdded((prev) => ({ ...prev, [productId]: true }));
-      setTimeout(() => setAdded((prev) => ({ ...prev, [productId]: false })), 2000);
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      setAdded((prev) => ({
+        ...prev,
+        [productId]: true,
+      }));
+
+      setTimeout(() => {
+        setAdded((prev) => ({
+          ...prev,
+          [productId]: false,
+        }));
+      }, 2000);
+
+      queryClient.invalidateQueries({
+        queryKey: ["cart"],
+      });
     },
+
     onError: (error) => {
       if (error?.response?.status === 401) {
-        navigate('/auth/login');
+        navigate("/auth/login");
       }
-    }
+    },
   });
 
   const handleAddToCart = (productId) => {
     if (!user) {
-      navigate('/auth/login');
+      navigate("/auth/login");
       return;
     }
+
     addToCartMutation.mutate(productId);
   };
 
@@ -115,195 +116,159 @@ export default function BestSellers() {
     <>
       <style>{styles}</style>
 
-      <section
-        className="w-full py-16 md:py-24 px-6 md:px-12 lg:px-16"
-        style={{ background: "#fdf0ee", fontFamily: "'Jost', sans-serif" }}
-      >
-        <div className="container mx-auto max-w-7xl">
-
-          {/* Header */}
-          <div className="anim-1 text-center mb-12 md:mb-14">
-            <p
-              className="text-[10px] tracking-[0.22em] uppercase mb-3"
-              style={{ color: "#9e8a85", fontWeight: "400" }}
-            >
-              The Glow List
-            </p>
+      <section className="bg-[#f6f3ef] py-10 lg:py-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-5 lg:px-8">
+          {/* HEADER */}
+          <div className="anim-1 text-center mb-16">
             <h2
+              className="text-[#1d1b19] mb-4"
               style={{
                 fontFamily: "'Cormorant Garamond', serif",
-                fontWeight: "400",
-                fontSize: "clamp(2rem, 4vw, 2.8rem)",
-                color: "#2e2420",
-                letterSpacing: "-0.01em",
+                fontWeight: 500,
+                fontSize: "clamp(2.5rem,5vw,4.5rem)",
+                letterSpacing: "-0.03em",
               }}
             >
-              Best-Selling Essentials
+              Trending This Week
             </h2>
+
+            <p className="text-[#7c746d] text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+              Curated selections from our editors that are capturing the
+              imagination of our readers worldwide.
+            </p>
           </div>
 
-          {/* Loading Skeletons */}
+          {/* LOADING */}
           {isLoading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[0, 1, 2, 3].map((i) => (
                 <SkeletonCard key={i} index={i} />
               ))}
             </div>
           )}
 
-          {/* Error State */}
+          {/* ERROR */}
           {isError && (
-            <div className="anim-2 text-center py-12">
+            <div className="text-center py-20">
               <p
+                className="text-[#7c746d] mb-6"
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: "1.3rem",
-                  color: "#9e8a85",
+                  fontSize: "1.5rem",
                 }}
               >
-                Unable to load best sellers right now.
+                Unable to load trending books.
               </p>
+
               <button
-                onClick={() => queryClient.invalidateQueries({ queryKey: ["bestSellers"] })}
-                className="mt-4 px-6 py-2 rounded-full text-[11px] tracking-[0.16em] uppercase cursor-pointer"
-                style={{
-                  fontFamily: "'Jost', sans-serif",
-                  fontWeight: "400",
-                  background: "transparent",
-                  color: "#2e2420",
-                  border: "1px solid #d4c4be",
-                }}
+                onClick={() =>
+                  queryClient.invalidateQueries({
+                    queryKey: ["bestSellers"],
+                  })
+                }
+                className="border border-[#cfc5bc] px-8 h-11 uppercase tracking-[0.25em] text-xs hover:bg-[#ece6df] transition"
               >
                 Retry
               </button>
             </div>
           )}
 
-          {/* Product Grid */}
+          {/* BOOK GRID */}
           {!isLoading && !isError && products.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
-              {products.map((product, index) => (
-                <div
-                  key={product._id}
-                  className={`product-card flex flex-col rounded-2xl overflow-hidden ${ANIM_CLASSES[index] || "anim-2"}`}
-                  style={{
-                    background: "#fff",
-                    border: "1px solid #f0e4df",
-                    boxShadow: "0 4px 20px rgba(100,60,50,0.05)",
-                  }}
-                >
-                  {/* Image */}
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {products.map((product, index) => (
                   <div
-                    className="w-full overflow-hidden cursor-pointer"
-                    style={{ aspectRatio: "1/1" }}
-                    onClick={() => navigate(`/shop/${product._id}`)}
+                    key={product._id}
+                    className={`book-card ${ANIM_CLASSES[index]} shadow hover:shadow-xl p-4`}
                   >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex flex-col flex-1 p-5 gap-3">
-
-                    {/* Badge */}
-                    {product.totalSold > 0 && (
-                      <span
-                        className="self-start text-[9px] tracking-[0.14em] uppercase px-2.5 py-1 rounded-full"
-                        style={{
-                          background: "#e8d5ce",
-                          color: "#7a5c56",
-                          fontWeight: "500",
-                        }}
-                      >
-                        BESTSELLER
-                      </span>
-                    )}
-
-                    {/* Name + Category */}
+                    {/* IMAGE */}
                     <div
-                      className="cursor-pointer"
-                      onClick={() => navigate(`/product/${product._id}`)}
+                      className="relative overflow-hidden mb-5 cursor-pointer bg-[#ebe5df]"
+                      style={{
+                        aspectRatio: "3/4",
+                      }}
+                      onClick={() => navigate(`/shop/${product._id}`)}
                     >
-                      <h3
-                        className="mb-1 leading-snug"
-                        style={{
-                          fontFamily: "'Cormorant Garamond', serif",
-                          fontWeight: "500",
-                          fontSize: "1.15rem",
-                          color: "#2e2420",
-                          letterSpacing: "0.01em",
-                        }}
-                      >
-                        {product.name}
-                      </h3>
-                      <p
-                        className="text-xs"
-                        style={{
-                          fontWeight: "300",
-                          color: "#9e8a85",
-                          letterSpacing: "0.02em",
-                        }}
-                      >
-                        {product.category
-                          ? product.category.charAt(0) + product.category.slice(1).toLowerCase()
-                          : ""}
-                      </p>
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
 
-                    {/* Price */}
-                    <p
-                      className="text-base"
-                      style={{
-                        fontWeight: "500",
-                        color: "#2e2420",
-                        letterSpacing: "0.02em",
-                      }}
-                    >
-                      ${product.price?.toFixed(2)}
+                    {/* CATEGORY */}
+                    <p className="uppercase tracking-[0.22em] text-[9px] text-[#9c8f85] mb-2">
+                      {product.category || "Historical Fiction"}
                     </p>
 
-                    {/* Add to Cart */}
-                    <button
-                      onClick={() => handleAddToCart(product._id)}
-                      disabled={addToCartMutation.isPending}
-                      className="mt-auto w-full rounded-full py-3 text-[11px] tracking-[0.16em] uppercase cursor-pointer"
+                    {/* TITLE */}
+                    <h3
+                      onClick={() => navigate(`/product/${product._id}`)}
+                      className="cursor-pointer text-[#1d1b19] leading-snug hover:text-[#6e6259] transition mb-1"
                       style={{
-                        fontFamily: "'Jost', sans-serif",
-                        fontWeight: "400",
-                        background: added[product._id] ? "#2e2420" : "transparent",
-                        color: added[product._id] ? "#fff" : "#2e2420",
-                        border: "1px solid #d4c4be",
-                        transition: "all 0.2s ease",
+                        fontFamily: "'Cormorant Garamond', serif",
+                        fontWeight: 500,
+                        fontSize: "clamp(1.1rem,2vw,1.6rem)",
                       }}
                     >
-                      {added[product._id] ? "✓ Added" : "Add to Cart"}
-                    </button>
+                      {product.name}
+                    </h3>
 
+                    {/* AUTHOR */}
+                    <p className="text-[#7c746d] text-sm mb-3">
+                      {product.brand || "Marcus Thorne"}
+                    </p>
+
+                    {/* PRICE + BUTTON */}
+                    <div className="flex items-center justify-between">
+                      <p className="text-[#1d1b19] text-sm font-medium">
+                        ${product.price?.toFixed(2)}
+                      </p>
+
+                      <button
+                        onClick={() => handleAddToCart(product._id)}
+                        disabled={addToCartMutation.isPending}
+                        className={`btn bg-gray-200  text-[9px] uppercase tracking-[0.22em] border-b transition ${
+                          added[product._id]
+                            ? "text-[#1d1b19] border-[#1d1b19]"
+                            : "text-[#8d8178] border-transparent hover:border-[#8d8178]"
+                        }`}
+                      >
+                        {added[product._id] ? "Added" : "Add to Cart"}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+
+              {/* BOTTOM LINK */}
+              <div className="anim-5 text-center mt-16">
+                <button
+                  onClick={() => navigate("/shop")}
+                  className="uppercase tracking-[0.3em] text-[10px] text-[#5f554d] border-b border-[#b9ada3] hover:text-[#1d1b19] transition"
+                >
+                  Explore the Full Catalog
+                </button>
+              </div>
+            </>
           )}
 
-          {/* Empty State */}
+          {/* EMPTY */}
           {!isLoading && !isError && products.length === 0 && (
-            <div className="anim-2 text-center py-12">
+            <div className="text-center py-20">
               <p
+                className="text-[#7c746d]"
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: "1.3rem",
-                  color: "#9e8a85",
+                  fontSize: "1.5rem",
                 }}
               >
-                No products available yet.
+                No books available yet.
               </p>
             </div>
           )}
-
         </div>
       </section>
     </>
