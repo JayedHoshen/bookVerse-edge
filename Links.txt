@@ -1,0 +1,2 @@
+Live link: https://bookverseedge.netlify.app/
+Github link: https://github.com/JayedHoshen/bookVerse-edge
