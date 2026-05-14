@@ -257,12 +257,12 @@ export default function TrendingBooks() {
 
           {/* EMPTY */}
           {!isLoading && !isError && products.length === 0 && (
-            <div className="text-center py-20">
+            <div className="text-center py-20 bg-white rounded-lg shadow hover:shadow-lg transition">
               <p
                 className="text-[#7c746d]"
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: "1.5rem",
+                  fontSize: "2.5rem",
                 }}
               >
                 No books available yet.

@@ -35,6 +35,7 @@ const NAV_LINKS = [
     category: "CLASSIC",
   },
 ];
+
 export default function Navbar() {
   const [active, setActive] = useState("Home");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -65,6 +66,8 @@ export default function Navbar() {
 
     if (location.pathname === "/") {
       setActive("Home");
+    } else if (location.pathname.includes("/dashboard")) {
+      setActive("Dashboard");
     } else if (location.pathname.includes("/shop")) {
       if (currentCategory) {
         const matchedLink = NAV_LINKS.find(
@@ -107,14 +110,23 @@ export default function Navbar() {
     }
   };
 
+  const getDashboardPath = () => {
+    if (!user) return "/auth/login";
+    if (user.role === "admin") return "/admin/dashboard";
+    return "/user/dashboard";
+  };
+
+  // DASHBOARD
+  const handleDashboardClick = () => {
+    navigate(getDashboardPath());
+    setActive("Dashboard");
+    setMenuOpen(false);
+  };
+
   // CART
   const handleCartClick = () => {
     if (isAuthenticated) {
-      if (user?.role === "admin") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/user/cart");
-      }
+      navigate("/user/cart");
     } else {
       navigate("/auth/login");
     }
@@ -123,10 +135,7 @@ export default function Navbar() {
   // ACCOUNT
   const handleAccountClick = () => {
     if (isAuthenticated) {
-      const dashboardPath =
-        user?.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
-
-      navigate(dashboardPath);
+      navigate(getDashboardPath());
     } else {
       navigate("/auth/login");
     }
@@ -148,7 +157,7 @@ export default function Navbar() {
           </Link>
 
           {/* DESKTOP NAV */}
-          <ul className="hidden  lg:flex items-center gap-4">
+          <ul className="hidden lg:flex items-center gap-4">
             {NAV_LINKS.map(({ label, category, path }) => (
               <li key={label}>
                 <button
@@ -167,6 +176,25 @@ export default function Navbar() {
                 </button>
               </li>
             ))}
+
+            {/* DASHBOARD LINK */}
+            {isAuthenticated && (
+              <li>
+                <button
+                  onClick={handleDashboardClick}
+                  className={`relative text-sm uppercase tracking-[0.25em] transition-all duration-300 ${
+                    active === "Dashboard"
+                      ? "text-[#E7D7B7]"
+                      : "text-neutral-500 hover:text-neutral-200"
+                  }`}
+                >
+                  Dashboard
+                  {active === "Dashboard" && (
+                    <span className="absolute left-0 -bottom-3 w-full h-[1px] bg-[#E7D7B7]" />
+                  )}
+                </button>
+              </li>
+            )}
           </ul>
 
           {/* RIGHT SIDE */}
@@ -181,6 +209,7 @@ export default function Navbar() {
                   {cartCount}
                 </span>
               )}
+
               <FaCartShopping className="text-white text-xl" />
             </button>
 
@@ -217,6 +246,20 @@ export default function Navbar() {
                   {label}
                 </button>
               ))}
+
+              {/* MOBILE DASHBOARD */}
+              {isAuthenticated && (
+                <button
+                  onClick={handleDashboardClick}
+                  className={`text-left text-sm uppercase tracking-[0.2em] transition ${
+                    active === "Dashboard"
+                      ? "text-[#E7D7B7]"
+                      : "text-neutral-500"
+                  }`}
+                >
+                  Dashboard
+                </button>
+              )}
             </div>
           </div>
         )}

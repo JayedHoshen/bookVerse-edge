@@ -1,267 +1,360 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  Package, 
-  Bell, 
-  ShoppingBag, 
-  DollarSign, 
-  TrendingUp, 
-  Users,
-  BarChart3,
-  ArrowUp,
-  LogOut
-} from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { fetchProducts, fetchOrderStats, fetchCustomerStats, logoutUser } from '../../api/api';
-import { useAuth } from '../../context/AuthContext';
+import { Package, ShoppingBag, Users, BarChart3, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  fetchProducts,
+  fetchOrderStats,
+  fetchCustomerStats,
+  fetchOrders,
+  logoutUser,
+} from "../../api/api";
+import { useAuth } from "../../context/AuthContext";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
   const { data: productsData, isLoading: productsLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: fetchProducts
+    queryKey: ["products"],
+    queryFn: fetchProducts,
   });
 
-  const { data: orderStats, isLoading: orderStatsLoading } = useQuery({
-    queryKey: ['orderStats'],
-    queryFn: fetchOrderStats
+  const { data: orderStatsData, isLoading: orderStatsLoading } = useQuery({
+    queryKey: ["orderStats"],
+    queryFn: fetchOrderStats,
   });
 
-  const { data: customerStats, isLoading: customerStatsLoading } = useQuery({
-    queryKey: ['customerStats'],
-    queryFn: fetchCustomerStats
+  const { data: customerStatsData, isLoading: customerStatsLoading } = useQuery(
+    {
+      queryKey: ["customerStats"],
+      queryFn: fetchCustomerStats,
+    },
+  );
+
+  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+    queryKey: ["orders"],
+    queryFn: fetchOrders,
   });
 
   const logoutMutation = useMutation({
     mutationFn: logoutUser,
     onSuccess: () => {
       logout();
-      navigate('/auth/login');
+      navigate("/auth/login");
     },
   });
 
-  const handleLogout = () => {
-    logoutMutation.mutate();
-  };
+  const handleLogout = () => logoutMutation.mutate();
 
-  const totalProducts = Array.isArray(productsData) ? productsData.length : productsData?.data?.length || 0;
-  const totalOrders = orderStats?.data?.totalOrders || 0;
-  const pendingOrders = orderStats?.data?.pendingOrders || 0;
-  const totalRevenue = orderStats?.data?.totalRevenue || 0;
-  const totalCustomers = customerStats?.data?.totalCustomers || 0;
-  const activeCustomers = customerStats?.data?.activeCustomers || 0;
+  const products = Array.isArray(productsData)
+    ? productsData
+    : productsData?.data || [];
+  const orders = ordersData?.data || [];
+  const orderStats = orderStatsData?.data || {};
+  const customerStats = customerStatsData?.data || {};
+
+  const recentOrders = orders.slice(0, 3);
+
   return (
-    <div className="min-h-screen bg-[#fdfaf7] flex font-sans">
-      {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-100 flex flex-col">
-        <div className="p-6">
-          <h2 className="text-2xl font-semibold text-gray-900">Glowify</h2>
-          <p className="text-xs text-gray-500">Management</p>
+    <div className="min-h-screen bg-[#f8f5f0] flex font-sans">
+      <aside className="w-72 bg-white border-r border-gray-200 flex flex-col">
+        <div className="px-8 py-8">
+          <h2 className="text-3xl font-semibold text-[#1f1f1f]">BookVerse</h2>
+          <p className="mt-1 text-sm text-gray-500">Admin Dashboard</p>
         </div>
 
-        <nav className="flex-1 px-3">
-          <div className="space-y-1">
-            <Link to="/admin/inventory" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-2xl">
-              <Package className="w-5 h-5" />
-              <span>Inventory</span>
-            </Link>
-            <Link to="/admin/orders" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-2xl">
-              <ShoppingBag className="w-5 h-5" />
-              <span>Orders</span>
-            </Link>
-            <Link to="/admin/customers" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-2xl">
-              <Users className="w-5 h-5" />
-              <span>Customers</span>
-            </Link>
-            <Link to="/admin/dashboard" className="flex items-center gap-3 px-4 py-3 bg-rose-50 text-rose-700 rounded-2xl font-medium">
-              <BarChart3 className="w-5 h-5" />
-              <span>Analytics</span>
-            </Link>
-          </div>
+        <div className="px-8 pb-4">
+          <button
+            onClick={handleLogout}
+            disabled={logoutMutation.isLoading}
+            className="w-full flex items-center justify-center gap-2 rounded-full bg-[#f3ebe1] px-4 py-3 text-sm font-semibold text-[#9f5d16] hover:bg-[#e8dccf] transition"
+          >
+            <LogOut className="w-4 h-4" />
+            {logoutMutation.isLoading ? "Signing out..." : "Sign Out"}
+          </button>
+        </div>
+
+        <nav className="flex-1 px-4 space-y-2">
+          <Link
+            to="/admin/dashboard"
+            className="flex items-center gap-3 rounded-3xl px-5 py-4 bg-[#f3ebe1] text-[#9f5d16] font-semibold shadow-sm"
+          >
+            <BarChart3 className="w-5 h-5" />
+            Analytics
+          </Link>
+          <Link
+            to="/admin/inventory"
+            className="flex items-center gap-3 rounded-3xl px-5 py-4 text-gray-700 hover:bg-gray-100 transition"
+          >
+            <Package className="w-5 h-5" />
+            Inventory
+          </Link>
+          <Link
+            to="/admin/orders"
+            className="flex items-center gap-3 rounded-3xl px-5 py-4 text-gray-700 hover:bg-gray-100 transition"
+          >
+            <ShoppingBag className="w-5 h-5" />
+            Orders
+          </Link>
+          <Link
+            to="/admin/customers"
+            className="flex items-center gap-3 rounded-3xl px-5 py-4 text-gray-700 hover:bg-gray-100 transition"
+          >
+            <Users className="w-5 h-5" />
+            Customers
+          </Link>
         </nav>
+      </aside>
 
-        <div className="p-6 border-t">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-rose-100 rounded-full flex items-center justify-center">
-              👩‍💼
-            </div>
-            <div>
-              <p className="font-medium">Admin</p>
-              <button 
-                onClick={handleLogout}
-                disabled={logoutMutation.isLoading}
-                className="text-xs text-gray-500 hover:text-red-600 disabled:text-gray-400 flex items-center gap-1 transition-colors"
-              >
-                <LogOut className="w-3 h-3" /> {logoutMutation.isLoading ? 'Signing out...' : 'Sign Out'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 p-8">
+      <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-10">
+          <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 mb-10">
             <div>
-              <h1 className="text-4xl font-semibold text-gray-900">Analytics Overview</h1>
-              <p className="text-gray-600 mt-1">Your shop's performance at a glance.</p>
+              <p className="uppercase tracking-[0.35em] text-xs text-[#9f5d16] mb-3">
+                Management Overview
+              </p>
+              <h1 className="text-5xl font-semibold text-[#1f1f1f]">
+                Welcome back, admin.
+              </h1>
+              <p className="text-gray-600 mt-3 max-w-2xl">
+                Curate the collection, monitor user engagement, and oversee the
+                library flow of the BookVerse ecosystem.
+              </p>
             </div>
-            <button className="flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-2xl hover:bg-black transition-colors">
-              <span>↓</span> Export Report
+            <button
+              onClick={() => navigate("/admin/inventory")}
+              className="inline-flex items-center gap-2 rounded-full bg-[#1f1f1f] px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-black transition"
+            >
+              + Add New Book
             </button>
           </div>
 
-          {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div className="bg-emerald-100 p-3 rounded-2xl">
-                  <Package className="w-6 h-6 text-emerald-600" />
-                </div>
-                <span className="text-emerald-600 text-sm font-medium flex items-center gap-1">
-                  +2% <TrendingUp className="w-4 h-4" />
-                </span>
-              </div>
-              <p className="text-4xl font-semibold mt-6">{productsLoading ? '...' : totalProducts}</p>
-              <p className="text-gray-600">Total Products</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+            <div className="rounded-4xl border border-gray-200 bg-white p-6 shadow-sm">
+              <p className="text-sm uppercase tracking-[0.25em] text-gray-500">
+                Total Books
+              </p>
+              <p className="mt-6 text-4xl font-semibold text-[#1f1f1f]">
+                {productsLoading ? "..." : products.length}
+              </p>
+              <p className="mt-4 text-sm text-gray-500">
+                Fresh titles in inventory.
+              </p>
             </div>
-
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div className="bg-red-100 p-3 rounded-2xl">
-                  <Bell className="w-6 h-6 text-red-600" />
-                </div>
-                <span className="text-red-600 text-sm font-medium">Action Needed</span>
-              </div>
-              <p className="text-4xl font-semibold mt-6">{orderStatsLoading ? '...' : pendingOrders}</p>
-              <p className="text-gray-600">Low Stock Alerts</p>
+            <div className="rounded-4xl border border-gray-200 bg-white p-6 shadow-sm">
+              <p className="text-sm uppercase tracking-[0.25em] text-gray-500">
+                Active Users
+              </p>
+              <p className="mt-6 text-4xl font-semibold text-[#1f1f1f]">
+                {customerStatsLoading
+                  ? "..."
+                  : customerStats.activeCustomers || 0}
+              </p>
+              <p className="mt-4 text-sm text-gray-500">
+                Currently active library members.
+              </p>
             </div>
-
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div className="bg-amber-100 p-3 rounded-2xl">
-                  <ShoppingBag className="w-6 h-6 text-amber-600" />
-                </div>
-                <span className="text-gray-500 text-sm font-medium">Today</span>
-              </div>
-              <p className="text-4xl font-semibold mt-6">{orderStatsLoading ? '...' : totalOrders}</p>
-              <p className="text-gray-600">Total Orders</p>
+            <div className="rounded-4xl border border-gray-200 bg-white p-6 shadow-sm">
+              <p className="text-sm uppercase tracking-[0.25em] text-gray-500">
+                Revenue (MTD)
+              </p>
+              <p className="mt-6 text-4xl font-semibold text-[#1f1f1f]">
+                {orderStatsLoading
+                  ? "..."
+                  : `$${(orderStats.totalRevenue || 0).toLocaleString()}`}
+              </p>
+              <p className="mt-4 text-sm text-gray-500">
+                Library sales this month.
+              </p>
             </div>
-
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div className="bg-emerald-100 p-3 rounded-2xl">
-                  <DollarSign className="w-6 h-6 text-emerald-600" />
-                </div>
-                <span className="text-emerald-600 text-sm font-medium flex items-center gap-1">
-                  +18% <TrendingUp className="w-4 h-4" />
-                </span>
-              </div>
-              <p className="text-4xl font-semibold mt-6">${totalRevenue.toLocaleString()}</p>
-              <p className="text-gray-600">Total Revenue</p>
+            <div className="rounded-4xl border border-gray-200 bg-white p-6 shadow-sm">
+              <p className="text-sm uppercase tracking-[0.25em] text-gray-500">
+                Pending Orders
+              </p>
+              <p className="mt-6 text-4xl font-semibold text-[#1f1f1f]">
+                {orderStatsLoading ? "..." : orderStats.pendingOrders || 0}
+              </p>
+              <p className="mt-4 text-sm text-gray-500">
+                Orders waiting to be fulfilled.
+              </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            {/* Weekly Sales Chart */}
-            <div className="lg:col-span-3 bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold">Weekly Sales</h2>
-                <button className="text-gray-400 hover:text-gray-600">•••</button>
-              </div>
-
-              {/* Simple CSS Bar Chart */}
-              <div className="h-64 flex items-end gap-3 mt-4">
-                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                    <div 
-                      className={`w-full bg-linear-to-t from-rose-300 to-emerald-300 rounded-t-xl transition-all ${i === 3 ? 'h-[85%]' : i === 5 ? 'h-[70%]' : 'h-[55%]'}`}
-                    />
-                    <span className="text-xs text-gray-500">{day}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-8 flex items-center justify-between">
+          <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+            <section className="rounded-4xl border border-gray-200 bg-white p-8 shadow-sm">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
                 <div>
-                  <p className="text-sm text-gray-500">Average Daily Sales</p>
-                  <p className="text-3xl font-semibold">$2,127</p>
+                  <h2 className="text-2xl font-semibold text-[#1f1f1f]">
+                    Manage Catalog
+                  </h2>
+                  <p className="text-gray-500 mt-2">
+                    Review and update the current library inventory.
+                  </p>
                 </div>
-                <div className="h-2 w-40 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full w-[65%] bg-linear-to-r from-rose-400 to-emerald-400"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Orders */}
-            <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold">Recent Orders</h2>
-                <button className="text-rose-600 text-sm font-medium">View All →</button>
+                <button
+                  onClick={() => navigate("/admin/inventory")}
+                  className="rounded-full bg-[#1f1f1f] px-6 py-3 text-sm font-semibold text-white hover:bg-black transition"
+                >
+                  View Full Inventory
+                </button>
               </div>
 
-              <div className="space-y-5">
-                {[
-                  { id: "GLO-92831", customer: "Elena Vance", status: "SHIPPED", amount: "128.00", avatar: "👩" },
-                  { id: "GLO-92830", customer: "Marcus Chen", status: "PENDING", amount: "245.50", avatar: "👨" },
-                  { id: "GLO-92829", customer: "Isabella Ross", status: "SHIPPED", amount: "89.00", avatar: "👩" },
-                  { id: "GLO-92828", customer: "David Miller", status: "SHIPPED", amount: "312.20", avatar: "👨" },
-                ].map((order, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 group">
-                    <div className="flex items-center gap-4">
-                      <div className="text-2xl">{order.avatar}</div>
-                      <div>
-                        <p className="font-medium text-sm">{order.id}</p>
-                        <p className="text-sm text-gray-600">{order.customer}</p>
-                      </div>
-                    </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-separate border-spacing-y-3">
+                  <thead>
+                    <tr className="text-sm text-gray-500">
+                      <th className="pb-3 px-4">Book Title</th>
+                      <th className="pb-3 px-4">Category</th>
+                      <th className="pb-3 px-4">Price</th>
+                      <th className="pb-3 px-4">Stock</th>
+                      <th className="pb-3 px-4">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productsLoading ? (
+                      <tr>
+                        <td
+                          colSpan="5"
+                          className="px-4 py-8 text-center text-gray-500"
+                        >
+                          Loading inventory...
+                        </td>
+                      </tr>
+                    ) : (
+                      products.slice(0, 5).map((product) => (
+                        <tr
+                          key={product._id}
+                          className="bg-[#fcfbf8] rounded-3xl shadow-sm"
+                        >
+                          <td className="px-4 py-4 font-medium text-[#1f1f1f]">
+                            {product.name}
+                          </td>
+                          <td className="px-4 py-4 text-gray-600">
+                            {product.category}
+                          </td>
+                          <td className="px-4 py-4 font-semibold text-[#1f1f1f]">
+                            ${product.price.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-4">
+                            <span
+                              className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
+                                product.stock === 0
+                                  ? "bg-red-100 text-red-700"
+                                  : product.stock <= 10
+                                    ? "bg-orange-100 text-orange-700"
+                                    : "bg-emerald-100 text-emerald-700"
+                              }`}
+                            >
+                              {product.stock === 0
+                                ? "Out of stock"
+                                : `${product.stock} in stock`}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <button
+                              onClick={() => navigate("/admin/inventory")}
+                              className="rounded-full bg-[#1f1f1f] px-4 py-2 text-xs font-semibold text-white hover:bg-black transition"
+                            >
+                              Edit
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
 
-                    <div className="text-right">
-                      <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
-                        order.status === 'SHIPPED' 
-                          ? 'bg-emerald-100 text-emerald-700' 
-                          : 'bg-amber-100 text-amber-700'
-                      }`}>
-                        {order.status}
-                      </span>
-                      <p className="font-semibold mt-1">${order.amount}</p>
-                    </div>
+            <aside className="space-y-6">
+              <div className="rounded-4xl border border-gray-200 bg-white p-8 shadow-sm">
+                <div className="flex items-center justify-between mb-6 gap-4">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-[#1f1f1f]">
+                      Order Management
+                    </h2>
+                    <p className="text-gray-500 mt-2">
+                      Monitor and fulfill recent customer requests.
+                    </p>
                   </div>
-                ))}
+                  <span className="rounded-full bg-[#f3ebe1] px-3 py-1 text-xs font-semibold text-[#9f5d16]">
+                    Live
+                  </span>
+                </div>
+
+                {ordersLoading ? (
+                  <div className="py-10 text-center text-gray-500">
+                    Loading orders...
+                  </div>
+                ) : recentOrders.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentOrders.map((order) => (
+                      <div
+                        key={order._id}
+                        className="rounded-3xl bg-[#fcfbf8] p-5 shadow-sm"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.2em] text-gray-500">
+                              {order.orderNumber}
+                            </p>
+                            <p className="mt-2 font-semibold text-[#1f1f1f]">
+                              {order.customerName}
+                            </p>
+                          </div>
+                          <span className="rounded-full bg-[#e9f6ff] px-3 py-1 text-xs font-semibold text-[#1570ff]">
+                            {order.status}
+                          </span>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+                          <span>
+                            {new Date(order.createdAt).toLocaleDateString()}
+                          </span>
+                          <span>${order.totalAmount.toFixed(2)}</span>
+                        </div>
+                        <button
+                          onClick={() => navigate("/admin/orders")}
+                          className="mt-5 w-full rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-[#1f1f1f] hover:bg-gray-50 transition"
+                        >
+                          Details
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    No recent orders to display.
+                  </p>
+                )}
               </div>
-            </div>
-          </div>
 
-          {/* Bottom Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-            {/* Restorative Insights */}
-            <div className="bg-black text-white rounded-3xl p-8">
-              <h3 className="text-xl font-semibold mb-4">Restorative Insights</h3>
-              <p className="leading-relaxed">
-                Product page engagement is up by 24% this week.<br />
-                Consider featuring 'Morning Ritual' set on the home page.
-              </p>
-              <button className="mt-6 underline underline-offset-4 hover:text-rose-400 transition-colors">
-                Analyze Trends →
-              </button>
-            </div>
-
-            {/* Glowify Pro */}
-            <div className="bg-[#f8e7e7] rounded-3xl p-8 relative overflow-hidden">
-              <h3 className="text-2xl font-semibold text-gray-900">Glowify Pro</h3>
-              <p className="mt-3 text-gray-700 leading-relaxed">
-                Automated inventory syncing is now active across all storage locations. 
-                Your shelves are balanced.
-              </p>
-              <div className="mt-8 text-6xl opacity-20">✦</div>
-            </div>
+              <div className="rounded-4xl border border-gray-200 bg-[#fff8ed] p-8 shadow-sm">
+                <h3 className="text-xl font-semibold text-[#1f1f1f]">
+                  Quick Insights
+                </h3>
+                <p className="mt-3 text-gray-600">
+                  Inventory levels are stable. Focus on replenishing low stock
+                  products and keep the latest launches featured.
+                </p>
+                <ul className="mt-6 space-y-3 text-sm text-gray-700">
+                  <li className="flex items-center gap-3">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#1f1f1f]" />{" "}
+                    Reorder top-selling titles weekly.
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#1f1f1f]" />{" "}
+                    Review pending delivery issues daily.
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#1f1f1f]" />{" "}
+                    Launch promotional bundles for loyal users.
+                  </li>
+                </ul>
+              </div>
+            </aside>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

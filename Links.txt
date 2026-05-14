@@ -1,2 +1,15 @@
-Live link: https://bookverseedge.netlify.app/
+Live link: https://book-verse-edge.vercel.app/
 Github link: https://github.com/JayedHoshen/bookVerse-edge
+
+------ admin ---------
+Name		: Hafez Mohammad Jayed Hossain
+Email		: hafezJayed@gmail.com
+Password	: jayed123
+Role 		: admin
+
+
+------------- user one --------
+Name		: User1
+Email		: user1@gmail.com
+Password	: user1123
+Role 		: user

@@ -171,11 +171,10 @@ export default function Signup() {
                 </p>
 
                 <h2
-                  className="text-[#1d1b19] mb-5"
+                  className="text-[#1d1b19] mb-5 text-5xl"
                   style={{
                     fontFamily: "'Cormorant Garamond', serif",
                     fontWeight: 500,
-                    fontSize: "clamp(2.8rem,5vw,4rem)",
                     letterSpacing: "-0.04em",
                   }}
                 >

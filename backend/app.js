@@ -6,6 +6,8 @@ const productRoutes = require("./routes/product.routes");
 const orderRoutes = require("./routes/order.routes");
 const customerRoutes = require("./routes/customer.routes");
 const cartRoutes = require("./routes/cart.routes");
+const reviewRoutes = require("./routes/review.routes");
+const readingProgressRoutes = require("./routes/readingProgress.routes");
 
 require("dotenv").config();
 const app = express();
@@ -27,6 +29,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/reading-progress", readingProgressRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Backend API is running" });
