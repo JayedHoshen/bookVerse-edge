@@ -10,8 +10,8 @@ const {
 const { protect } = require("../middlewares/auth.middleware");
 
 // All routes require authentication
-router.get("/", protect, getMyReadingProgress);
 router.get("/stats", protect, getReadingStats);
+router.get("/", protect, getMyReadingProgress);
 router.get("/:id", protect, getReadingProgressById);
 router.post("/", protect, updateReadingProgress);
 router.delete("/:id", protect, deleteReadingProgress);

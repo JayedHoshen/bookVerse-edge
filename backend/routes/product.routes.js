@@ -1,4 +1,5 @@
-const router = require('express').Router();
+const router = require("express").Router();
+const { protect, authorize } = require("../middlewares/auth.middleware");
 const {
   getProducts,
   getProductById,
@@ -8,15 +9,18 @@ const {
   addProduct,
   updateProduct,
   deleteProduct,
-} = require('../controllers/product.controller');
+} = require("../controllers/product.controller");
 
-router.get('/seed', seedProducts);
-router.get('/', getProducts);
-router.get('/categories', getCategories);
-router.get('/best-sellers', getBestSellers);
-router.get('/:id', getProductById);
-router.post('/', addProduct);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
+// Public routes
+router.get("/seed", seedProducts);
+router.get("/", getProducts);
+router.get("/categories", getCategories);
+router.get("/best-sellers", getBestSellers);
+router.get("/:id", getProductById);
+
+// Protected routes (admin only)
+router.post("/", protect, authorize("admin"), addProduct);
+router.put("/:id", protect, authorize("admin"), updateProduct);
+router.delete("/:id", protect, authorize("admin"), deleteProduct);
 
 module.exports = router;
