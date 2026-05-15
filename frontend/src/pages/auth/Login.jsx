@@ -97,21 +97,17 @@ export default function Login() {
 
       <div className="min-h-screen bg-[#f6f3ef] overflow-hidden relative flex flex-col">
         {/* GLOW */}
-        <div className="absolute top-[-120px] left-[-120px] w-[320px] h-[320px] bg-[#d7c6b2]/20 blur-[100px] rounded-full" />
+        <div className="absolute -top-30 -left-40 w-[320px] h-80 bg-[#d7c6b2]/20 blur-[100px] rounded-full" />
 
-        <div className="absolute bottom-[-100px] right-[-100px] w-[320px] h-[320px] bg-[#d7c6b2]/20 blur-[100px] rounded-full" />
+        <div className="absolute -bottom-25 -right-25 w-[320px] h-80 bg-[#d7c6b2]/20 blur-[100px] rounded-full" />
 
         {/* FLOATING BOOKS */}
-        <div className="absolute left-[-70px] top-24 opacity-40 rotate-[-12deg] hidden lg:block float">
-          <img src="/images/book-stack-left.png" alt="" className="w-[260px]" />
+        <div className="absolute -left-17 top-24 opacity-40 -rotate-12 hidden lg:block float">
+          <img src="/images/book-stack-left.png" alt="" className="w-65" />
         </div>
 
-        <div className="absolute right-[-40px] bottom-16 opacity-40 rotate-[7deg] hidden lg:block float">
-          <img
-            src="/images/book-stack-right.png"
-            alt=""
-            className="w-[280px]"
-          />
+        <div className="absolute -right-10 bottom-16 opacity-40 rotate-[7deg] hidden lg:block float">
+          <img src="/images/book-stack-right.png" alt="" className="w-70" />
         </div>
 
         {/* TOP NAV */}
@@ -158,7 +154,7 @@ export default function Login() {
               }}
             >
               {/* CARD GLOW */}
-              <div className="absolute top-[-80px] right-[-80px] w-[180px] h-[180px] bg-[#e6d7c3]/30 blur-[80px] rounded-full" />
+              <div className="absolute -top-20 -right-20 w-45 h-45 bg-[#e6d7c3]/30 blur-[80px] rounded-full" />
 
               {/* HEADER */}
               <div className="relative z-10 text-center mb-10 anim-1">
@@ -259,7 +255,7 @@ export default function Login() {
                       {loginMutation.isPending ? "Signing In..." : "Sign In"}
                     </span>
 
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-120%] group-hover:translate-x-[120%] transition-transform duration-1000" />
+                    <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent translate-x-[-120%] group-hover:translate-x-[120%] transition-transform duration-1000" />
                   </button>
                 </div>
 
